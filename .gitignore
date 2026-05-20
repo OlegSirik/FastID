@@ -1,0 +1,15 @@
+.env
+.env.local
+*.log
+.idea/
+.vscode/
+.DS_Store
+
+# Frontend
+FastIdFront/node_modules/
+FastIdFront/dist/
+FastIdFront/.angular/
+
+# Backend
+FastIdAPI/.gradle/
+FastIdAPI/build/

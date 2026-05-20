@@ -1,0 +1,27 @@
+@import '../../../../styles/variables';
+
+.pt-toolbar {
+  background-color: $toolbar-bg !important;
+  color: $white;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.12);
+}
+
+.toolbar-content {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+}
+
+.brand {
+  font-size: $font-size-2xl;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.tenant {
+  font-size: $font-size-lg;
+  font-weight: 500;
+  opacity: 0.95;
+  text-transform: uppercase;
+}

@@ -1,0 +1,45 @@
+@if (person) {
+  <div class="page-container">
+    <h1>Оформление полиса</h1>
+
+    <mat-card class="person-card">
+      <mat-card-content>
+        <p><strong>ФИО:</strong> {{ person.lastName }} {{ person.firstName }} {{ person.middleName }}</p>
+        <p><strong>Дата рождения:</strong> {{ person.dateOfBirth }}</p>
+        <p><strong>Паспорт:</strong> серия {{ person.passportSeria }}, номер {{ person.passportNumber }}</p>
+      </mat-card-content>
+    </mat-card>
+
+    <app-insurance-catalog />
+
+    @if (showNsOffers) {
+    <h2 class="section-title">Тарифы НС</h2>
+    <div class="offers">
+      @for (offer of offers; track offer.productCode) {
+        <mat-card class="offer-card">
+          <mat-card-header>
+            <mat-card-title>{{ offer.title }} + {{ formatPremium(offer) }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-actions align="end">
+            @if (offer.loading) {
+              <mat-spinner diameter="28"></mat-spinner>
+            } @else {
+              <button
+                mat-flat-button
+                color="primary"
+                [disabled]="offer.premium == null"
+                (click)="onBuy(offer)">
+                Купить
+              </button>
+            }
+          </mat-card-actions>
+        </mat-card>
+      }
+    </div>
+    } @else {
+      <p class="hint">Расчёт премии для выбранного продукта скоро будет доступен.</p>
+    }
+
+    <button mat-button (click)="backToStart()">Назад</button>
+  </div>
+}

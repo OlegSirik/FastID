@@ -1,0 +1,128 @@
+<div class="page-container">
+  <h1>Старт</h1>
+
+  @if (mode === 'scan' && loading) {
+    <div class="scan-loading">
+      <mat-spinner diameter="48"></mat-spinner>
+      <p>Загрузка данных из QR…</p>
+    </div>
+  } @else if (mode === 'scan' && error) {
+    <p class="error">{{ error }}</p>
+  } @else {
+    <div class="page-layout">
+      <div class="page-layout__main">
+        <mat-card class="person-card">
+          <mat-card-header>
+            <mat-card-title>Данные застрахованного</mat-card-title>
+          </mat-card-header>
+          <mat-card-content [formGroup]="form">
+            <div class="form-grid">
+              <mat-form-field appearance="outline">
+                <mat-label>Имя</mat-label>
+                <input matInput formControlName="firstName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Фамилия</mat-label>
+                <input matInput formControlName="lastName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Отчество</mat-label>
+                <input matInput formControlName="middleName" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Дата рождения</mat-label>
+                <input matInput type="date" formControlName="dateOfBirth" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Серия паспорта</mat-label>
+                <input matInput formControlName="passportSeria" />
+              </mat-form-field>
+              <mat-form-field appearance="outline">
+                <mat-label>Номер паспорта</mat-label>
+                <input matInput formControlName="passportNumber" />
+              </mat-form-field>
+            </div>
+            @if (mode === 'operator') {
+              <button mat-stroked-button color="primary" [disabled]="!form.valid" (click)="useFormForPolicy()">
+                Без QR — к оформлению
+              </button>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <app-insurance-catalog [person]="personForCatalog()" />
+      </div>
+
+      <div class="page-layout__side">
+        <mat-card class="qr-card">
+          <mat-card-header>
+            <mat-card-title>QR-код</mat-card-title>
+          </mat-card-header>
+          <mat-card-content class="qr-content">
+            @if (mode === 'scan') {
+              <p class="hint">Данные получены из QR-ссылки</p>
+            } @else if (linkLoading) {
+              <mat-spinner diameter="48"></mat-spinner>
+            } @else if (qrImageDataUri) {
+              <h3>Prosto.ID</h3>
+              <img [src]="qrImageDataUri" alt="QR" class="qr-image" />
+              @if (secureUrl) {
+                <a class="qr-link" [href]="secureUrl">{{ secureUrl }}</a>
+              }
+            } @else if (linkError) {
+              <p class="error">{{ linkError }}</p>
+            } @else {
+              <p class="hint">Заполните все поля</p>
+            }
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card class="my-policy-card">
+          <mat-card-header>
+            <mat-card-title>Мой полис</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            @if (!canProceedToPolicy()) {
+              <p class="hint">Заполните данные застрахованного</p>
+            } @else {
+              <dl class="my-policy-summary">
+                <div class="my-policy-row">
+                  <dt>Что страхуем</dt>
+                  <dd>{{ policySummary.whatInsuring }}</dd>
+                </div>
+                <div class="my-policy-row">
+                  <dt>Срок страхования</dt>
+                  <dd>{{ policySummary.periodLabel }}</dd>
+                </div>
+                <div class="my-policy-row">
+                  <dt>Страховая сумма</dt>
+                  <dd>{{ policySummary.sumInsuredLabel }}</dd>
+                </div>
+                <div class="my-policy-row my-policy-row--total">
+                  <dt>Итого</dt>
+                  <dd>
+                    @if (premiumLoading) {
+                      …
+                    } @else if (premiumTotal != null) {
+                      {{ buyButtonLabel() }}
+                    } @else {
+                      —
+                    }
+                  </dd>
+                </div>
+              </dl>
+            }
+            <button
+              mat-flat-button
+              color="primary"
+              class="buy-btn"
+              [disabled]="!canBuy()"
+              (click)="useFormForPolicy()">
+              Купить@if (buyButtonLabel()) {&nbsp;{{ buyButtonLabel() }}}
+            </button>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </div>
+  }
+</div>

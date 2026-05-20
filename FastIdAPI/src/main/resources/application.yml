@@ -1,0 +1,30 @@
+server:
+  port: 8080
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+
+politech:
+  api-url: ${POLITECH_API_URL:http://host.docker.internal:8080}
+  tenant-code: ${TENANT_CODE:demo}
+  user-login: ${SERVICE_USER_LOGIN:demo}
+  password: ${SERVICE_PASSWORD:demo}
+  client-id: ${SERVICE_CLIENT_ID:sys}
+  client-header: X-Pt-Client
+  client-header-value: PoliTechFront
+
+fastid:
+  rate-limit:
+    premium-per-minute: ${RATE_LIMIT_PREMIUM:10}
+    decrypt-per-minute: ${RATE_LIMIT_DECRYPT:20}
+    secure-link-per-minute: ${RATE_LIMIT_SECURE_LINK:10}
+
+logging:
+  level:
+    ru.fastid: INFO

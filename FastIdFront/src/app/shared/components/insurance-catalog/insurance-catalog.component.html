@@ -1,0 +1,163 @@
+<mat-card class="catalog-root">
+  <mat-card-header>
+    <mat-card-title>Что страхуем?</mat-card-title>
+  </mat-card-header>
+  <mat-card-content>
+    <div class="product-grid">
+      @for (product of products; track product.id) {
+        <mat-card
+          class="product-card"
+          [class.product-card--selected]="isSelected(product.id)"
+          [class.product-card--clickable]="selectable"
+          (click)="onSelect(product.id)"
+          (keydown.enter)="onSelect(product.id)"
+          [tabindex]="selectable ? 0 : -1"
+          [attr.role]="selectable ? 'button' : null">
+          <mat-card-header>
+            <mat-card-title>{{ product.title }}</mat-card-title>
+          </mat-card-header>
+          <mat-card-content>
+            <p class="product-desc">{{ product.description }}</p>
+          </mat-card-content>
+        </mat-card>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>
+
+@if (showNsCart) {
+  <mat-card class="ns-option-card ns-period-card">
+    <mat-card-header>
+      <mat-card-title>Срок страхования</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <div class="ns-period-row">
+        <mat-form-field appearance="outline" class="ns-field ns-field--compact">
+          <mat-label>Дата начала</mat-label>
+          <input
+            matInput
+            type="date"
+            [value]="nsState.periodStartDate"
+            (change)="onPeriodStartChange($any($event.target).value)" />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="ns-field ns-field--compact">
+          <mat-label>Дата окончания</mat-label>
+          <input matInput type="date" [value]="nsState.periodEndDate" disabled />
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="ns-field ns-field--compact">
+          <mat-label>Срок</mat-label>
+          <mat-select
+            [value]="nsState.periodMonths"
+            (valueChange)="onPeriodMonthsChange($event)">
+            @for (months of periodMonthOptions; track months) {
+              <mat-option [value]="months">{{ periodMonthsLabel(months) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="ns-cart">
+    <mat-card-header>
+      <mat-card-title>НС — параметры страхования</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <mat-radio-group
+        class="ns-packages-grid"
+        [value]="nsState.selectedPackageId"
+        (change)="onPackageSelect($event.value)">
+        @for (pkg of nsPackages; track pkg.id) {
+          <mat-card
+            class="ns-option-card"
+            [class.ns-option-card--active]="isPackageSelected(pkg.id)"
+            (click)="onPackageSelect(pkg.id)">
+            <mat-card-content>
+              <div class="ns-option-row">
+                <span class="ns-option-name">{{ pkg.title }}</span>
+                <mat-radio-button [value]="pkg.id" (click)="$event.stopPropagation()" />
+              </div>
+              <div class="ns-option-row">
+                <div class="ns-option-sum">
+                  @if (pkg.customSumInsured) {
+                    <mat-form-field appearance="outline" class="ns-field ns-field--compact">
+                      <mat-label>Страховая сумма</mat-label>
+                      <mat-select
+                        [disabled]="!isPackageSelected(pkg.id)"
+                        [value]="nsState.customSumInsured"
+                        (valueChange)="onCustomSumChange($event)"
+                        (click)="$event.stopPropagation()">
+                        @for (sum of customNsSumOptions; track sum) {
+                          <mat-option [value]="sum">{{ formatRub(sum) }}</mat-option>
+                        }
+                      </mat-select>
+                    </mat-form-field>
+                  } @else {
+                    <span class="ns-sum-value">{{ formatRub(pkg.defaultSumInsured) }}</span>
+                  }
+                </div>
+                <div class="ns-option-premium">
+                  <span class="ns-premium-label">Премия</span>
+                  <span class="ns-premium-value">{{ formatPremium(pkg.id) }}</span>
+                </div>
+              </div>
+            </mat-card-content>
+          </mat-card>
+        }
+      </mat-radio-group>
+
+
+      <div class="ns-extra-grid">
+        <mat-card
+          class="ns-option-card ns-option-card--wide"
+          [class.ns-option-card--active]="nsState.illnessEnabled">
+          <mat-card-content>
+            <div class="ns-option-row">
+              <span class="ns-extra-title">Страхование от болезней</span>
+              <mat-checkbox
+                [checked]="nsState.illnessEnabled"
+                (change)="onIllnessEnabledChange($event.checked)"
+                (click)="$event.stopPropagation()" />
+            </div>
+            <mat-form-field appearance="outline" class="ns-field">
+              <mat-label>Страховая сумма</mat-label>
+              <mat-select
+                [disabled]="!nsState.illnessEnabled"
+                [value]="nsState.illnessSumInsured"
+                (valueChange)="onIllnessSumChange($event)">
+                @for (sum of illnessSumOptions; track sum) {
+                  <mat-option [value]="sum">{{ formatRub(sum) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+
+        <mat-card
+          class="ns-option-card ns-option-card--wide"
+          [class.ns-option-card--active]="nsState.jobLossEnabled">
+          <mat-card-content>
+            <div class="ns-option-row">
+              <span class="ns-extra-title">Компенсировать потерю работы</span>
+              <mat-checkbox
+                [checked]="nsState.jobLossEnabled"
+                (change)="onJobLossEnabledChange($event.checked)"
+                (click)="$event.stopPropagation()" />
+            </div>
+            <mat-form-field appearance="outline" class="ns-field">
+              <mat-label>Сумма компенсации</mat-label>
+              <mat-select
+                [disabled]="!nsState.jobLossEnabled"
+                [value]="nsState.jobLossCompensation"
+                (valueChange)="onJobLossChange($event)">
+                @for (sum of jobLossOptions; track sum) {
+                  <mat-option [value]="sum">{{ formatRub(sum) }}</mat-option>
+                }
+              </mat-select>
+            </mat-form-field>
+          </mat-card-content>
+        </mat-card>
+      </div>
+    </mat-card-content>
+  </mat-card>
+}

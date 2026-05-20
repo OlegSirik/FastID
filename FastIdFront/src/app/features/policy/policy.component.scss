@@ -1,0 +1,22 @@
+.person-card {
+  margin-bottom: 24px;
+}
+
+.section-title {
+  margin: 8px 0 16px;
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #616161;
+}
+
+.offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.offer-card {
+  flex: 1 1 280px;
+  max-width: 360px;
+}

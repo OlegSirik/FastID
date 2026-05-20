@@ -1,0 +1,18 @@
+@if (loading) {
+  <div class="boot">
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Инициализация…</p>
+  </div>
+} @else if (boot.bootError) {
+  <div class="boot error">
+    <p>Ошибка: {{ boot.bootError }}</p>
+    <p>Проверьте переменные SERVICE_USER_LOGIN, SERVICE_PASSWORD, TENANT_CODE в FastIdAPI</p>
+  </div>
+} @else {
+  <div class="app-shell">
+    <app-toolbar />
+    <main class="app-main">
+      <router-outlet />
+    </main>
+  </div>
+}

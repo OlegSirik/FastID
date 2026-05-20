@@ -1,0 +1,99 @@
+@use '@angular/material' as mat;
+@import 'styles/variables';
+
+@include mat.core();
+
+$pt-public-theme: mat.define-theme((
+  color: (
+    theme-type: light,
+    primary: mat.$azure-palette,
+    tertiary: mat.$blue-palette,
+    use-system-variables: true,
+  ),
+  typography: (
+    use-system-variables: true,
+  ),
+  density: (
+    scale: 0,
+  ),
+));
+
+:root {
+  @include mat.all-component-themes($pt-public-theme);
+  @include mat.system-level-colors($pt-public-theme);
+  @include mat.system-level-typography($pt-public-theme);
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+  font-family: $font-family-primary;
+  color: $gray-900;
+  background-color: $gray-100;
+}
+
+.app-shell {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.app-main {
+  flex: 1;
+  background-color: $gray-100;
+}
+
+.page-container {
+  padding: $spacing-lg;
+  max-width: 1200px;
+  margin: 0 auto;
+
+  h1 {
+    margin: 0 0 $spacing-lg;
+    font-size: $font-size-2xl;
+    font-weight: 500;
+    color: $gray-700;
+  }
+}
+
+.mat-mdc-card,
+mat-card {
+  background-color: $white !important;
+  border-radius: $border-radius-md !important;
+  box-shadow: $shadow-md !important;
+}
+
+.mat-mdc-card-header {
+  padding-bottom: 0;
+}
+
+.mat-mdc-card-title {
+  font-size: $font-size-lg !important;
+  font-weight: 600 !important;
+  color: $gray-700 !important;
+}
+
+.error {
+  color: #c62828;
+}
+
+.hint {
+  color: $gray-600;
+}
+
+.boot {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  gap: $spacing-md;
+  background-color: $gray-100;
+
+  &.error p {
+    color: #c62828;
+    text-align: center;
+    max-width: 400px;
+  }
+}
