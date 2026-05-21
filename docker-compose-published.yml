@@ -1,8 +1,9 @@
+# Production: single image from Docker Hub (nginx + BFF).
+# Run: docker compose -f docker-compose-published.yml --env-file .env up -d
+
 services:
-  fastid-api:
-    build:
-      context: ./FastIdAPI
-      dockerfile: Dockerfile
+  fastid:
+    image: ${APP_IMAGE:-olegsirik/fastid:latest}
     restart: unless-stopped
     environment:
       POLITECH_API_URL: ${POLITECH_API_URL:-http://host.docker.internal:8080}
@@ -16,30 +17,11 @@ services:
       FASTID_SECURE_LINK_SECRET: ${FASTID_SECURE_LINK_SECRET:-change-me-in-production}
     extra_hosts:
       - "host.docker.internal:host-gateway"
-    networks:
-      - fastid-network
+    ports:
+      - "${FASTID_FRONT_PORT:-8082}:80"
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      test: ["CMD", "curl", "-f", "http://127.0.0.1:8080/actuator/health"]
       interval: 30s
       timeout: 10s
       retries: 5
-      start_period: 30s
-
-  fastid-front:
-    build:
-      context: ./FastIdFront
-      dockerfile: Dockerfile
-    restart: unless-stopped
-    environment:
-      TENANT_CODE: ${TENANT_CODE:-demo}
-    ports:
-      - "${FASTID_FRONT_PORT:-8082}:80"
-    depends_on:
-      fastid-api:
-        condition: service_healthy
-    networks:
-      - fastid-network
-
-networks:
-  fastid-network:
-    driver: bridge
+      start_period: 60s
