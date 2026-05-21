@@ -8,8 +8,8 @@ on:
 
 env:
   REGISTRY: docker.io
-  BACKEND_IMAGE: olegsirik/fastID-b
-  FRONTEND_IMAGE: olegsirik/fastID-f
+  BACKEND_IMAGE: olegsirik/fastid-b
+  FRONTEND_IMAGE: olegsirik/fastid-f
 
 jobs:
   build-and-push: 
