@@ -34,12 +34,20 @@ jobs:
         run: |
           echo "Images built successfully (FastIdAPI, FastIdFront)"
           docker compose images || true
+          echo ""
+          echo "Deploy runs only when these GitHub Actions secrets are set:"
+          echo "  SERVER_HOST, SERVER_USER, SERVER_SSH_KEY"
 
   deploy:
     name: Deploy to production
     runs-on: ubuntu-latest
     needs: [build]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    if: |
+      (github.event_name == 'push' && github.ref == 'refs/heads/master' ||
+       github.event_name == 'workflow_dispatch') &&
+      secrets.SERVER_HOST != '' &&
+      secrets.SERVER_USER != '' &&
+      secrets.SERVER_SSH_KEY != ''
 
     steps:
       - name: Deploy via SSH
