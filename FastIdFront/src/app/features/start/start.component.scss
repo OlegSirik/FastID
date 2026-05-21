@@ -82,6 +82,12 @@
   margin-top: 8px;
 }
 
+.person-card {
+  mat-card-header {
+    margin-bottom: 24px;
+  }
+}
+
 .form-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

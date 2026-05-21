@@ -1,10 +1,10 @@
 FROM gradle:8.7-jdk21 AS build
 WORKDIR /app
 COPY gradle/ gradle/
-COPY gradlew settings.gradle.kts build.gradle.kts ./
-RUN ./gradlew dependencies --no-daemon || true
+COPY settings.gradle.kts build.gradle.kts ./
+RUN gradle dependencies --no-daemon || true
 COPY src/ src/
-RUN ./gradlew bootJar -x test --no-daemon
+RUN gradle bootJar -x test --no-daemon
 
 FROM amazoncorretto:21-alpine
 WORKDIR /app

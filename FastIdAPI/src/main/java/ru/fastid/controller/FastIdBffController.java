@@ -16,8 +16,8 @@ import ru.fastid.dto.FastIdPersonData;
 import ru.fastid.dto.FastIdPremiumRequest;
 import ru.fastid.dto.FastIdPremiumResponse;
 import ru.fastid.dto.FastIdSecureLinkRequest;
-import ru.fastid.dto.FastIdSecureLinkResponse;
 import ru.fastid.service.BackendSessionService;
+import ru.fastid.service.FastIdSecureLinkService;
 import ru.fastid.service.RateLimitService;
 
 @RestController
@@ -26,14 +26,17 @@ public class FastIdBffController {
 
     private final BackendSessionService sessionService;
     private final PolitechApiClient apiClient;
+    private final FastIdSecureLinkService secureLinkService;
     private final RateLimitService rateLimitService;
 
     public FastIdBffController(
             BackendSessionService sessionService,
             PolitechApiClient apiClient,
+            FastIdSecureLinkService secureLinkService,
             RateLimitService rateLimitService) {
         this.sessionService = sessionService;
         this.apiClient = apiClient;
+        this.secureLinkService = secureLinkService;
         this.rateLimitService = rateLimitService;
     }
 
@@ -45,12 +48,7 @@ public class FastIdBffController {
         if (!rateLimitService.allowSecureLink(clientKey(httpRequest))) {
             return tooManyRequests();
         }
-        var response = apiClient.createSecureLink(
-            tenantCode,
-            sessionService.requireAccessToken(),
-            sessionService.requireAccountId(),
-            request);
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(secureLinkService.createSecureLink(request));
     }
 
     @PostMapping("/decrypt")
@@ -61,11 +59,7 @@ public class FastIdBffController {
         if (!rateLimitService.allowDecrypt(clientKey(httpRequest))) {
             return tooManyRequests();
         }
-        FastIdPersonData response = apiClient.decrypt(
-            tenantCode,
-            sessionService.requireAccessToken(),
-            sessionService.requireAccountId(),
-            request);
+        FastIdPersonData response = secureLinkService.decodeSecuredData(request.getSecuredData());
         return ResponseEntity.ok(response);
     }
 
@@ -77,11 +71,7 @@ public class FastIdBffController {
         if (!rateLimitService.allowDecrypt(clientKey(httpRequest))) {
             return tooManyRequests();
         }
-        FastIdPersonData response = apiClient.resolve(
-            tenantCode,
-            sessionService.requireAccessToken(),
-            sessionService.requireAccountId(),
-            securedData);
+        FastIdPersonData response = secureLinkService.decodeSecuredData(securedData);
         return ResponseEntity.ok(response);
     }
 

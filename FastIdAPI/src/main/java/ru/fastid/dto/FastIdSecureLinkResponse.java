@@ -1,7 +1,5 @@
 package ru.fastid.dto;
 
-import java.math.BigDecimal;
-
 public class FastIdSecureLinkResponse {
 
     private String url;

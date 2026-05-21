@@ -24,9 +24,6 @@ fastid:
     premium-per-minute: ${RATE_LIMIT_PREMIUM:10}
     decrypt-per-minute: ${RATE_LIMIT_DECRYPT:20}
     secure-link-per-minute: ${RATE_LIMIT_SECURE_LINK:10}
-  secure-link:
-    secret: ${FASTID_SECURE_LINK_SECRET:change-me-in-production}
-    qr-size: ${FASTID_QR_SIZE:256}
 
 logging:
   level:

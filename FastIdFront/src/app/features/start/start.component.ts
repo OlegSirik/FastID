@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, inject } from '@angular/core';
+import { Component, OnDestroy, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
@@ -58,6 +58,9 @@ export class StartComponent implements OnInit, OnDestroy {
   linkLoading = false;
   linkError: string | null = null;
 
+  /** Stable reference for catalog — avoids premium recalc on every change detection. */
+  catalogPerson = signal<FastIdPerson | null>(null);
+
   form = this.fb.group({
     firstName: ['', Validators.required],
     lastName: ['', Validators.required],
@@ -68,6 +71,16 @@ export class StartComponent implements OnInit, OnDestroy {
   });
 
   ngOnInit(): void {
+    this.form.valueChanges
+      .pipe(
+        debounceTime(400),
+        distinctUntilChanged((a, b) => JSON.stringify(a) === JSON.stringify(b)),
+        takeUntil(this.destroy$),
+      )
+      .subscribe(() => this.updateCatalogPerson());
+
+    this.updateCatalogPerson();
+
     const q = this.route.snapshot.queryParamMap.get('q');
     if (q) {
       this.mode = 'scan';
@@ -151,6 +164,7 @@ export class StartComponent implements OnInit, OnDestroy {
         this.resolvedPerson = person;
         this.patchFormFromPerson(person);
         this.loading = false;
+        this.refreshSecureLink();
       },
       error: () => {
         this.error = 'Не удалось прочитать данные из QR';
@@ -168,13 +182,15 @@ export class StartComponent implements OnInit, OnDestroy {
       passportSeria: person.passportSeria,
       passportNumber: person.passportNumber,
     });
+    this.updateCatalogPerson();
   }
 
-  personForCatalog(): FastIdPerson | null {
+  private updateCatalogPerson(): void {
     if (this.form.valid) {
-      return this.getPersonFromForm();
+      this.catalogPerson.set(this.getPersonFromForm());
+    } else {
+      this.catalogPerson.set(this.resolvedPerson);
     }
-    return this.resolvedPerson;
   }
 
   canProceedToPolicy(): boolean {

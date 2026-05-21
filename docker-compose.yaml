@@ -12,6 +12,7 @@ services:
       RATE_LIMIT_PREMIUM: ${RATE_LIMIT_PREMIUM:-10}
       RATE_LIMIT_DECRYPT: ${RATE_LIMIT_DECRYPT:-20}
       RATE_LIMIT_SECURE_LINK: ${RATE_LIMIT_SECURE_LINK:-10}
+      FASTID_SECURE_LINK_SECRET: ${FASTID_SECURE_LINK_SECRET:-change-me-in-production}
     extra_hosts:
       - "host.docker.internal:host-gateway"
     networks:

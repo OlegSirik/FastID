@@ -1,5 +1,5 @@
 <div class="page-container">
-  <h1>Старт</h1>
+  <h1>Оформление полиса</h1>
 
   @if (mode === 'scan' && loading) {
     <div class="scan-loading">
@@ -13,7 +13,7 @@
       <div class="page-layout__main">
         <mat-card class="person-card">
           <mat-card-header>
-            <mat-card-title>Данные застрахованного</mat-card-title>
+            <mat-card-title>Кого страхуем</mat-card-title>
           </mat-card-header>
           <mat-card-content [formGroup]="form">
             <div class="form-grid">
@@ -42,26 +42,17 @@
                 <input matInput formControlName="passportNumber" />
               </mat-form-field>
             </div>
-            @if (mode === 'operator') {
-              <button mat-stroked-button color="primary" [disabled]="!form.valid" (click)="useFormForPolicy()">
-                Без QR — к оформлению
-              </button>
-            }
+            
           </mat-card-content>
         </mat-card>
 
-        <app-insurance-catalog [person]="personForCatalog()" />
+        <app-insurance-catalog [person]="catalogPerson()" />
       </div>
 
       <div class="page-layout__side">
         <mat-card class="qr-card">
-          <mat-card-header>
-            <mat-card-title>QR-код</mat-card-title>
-          </mat-card-header>
           <mat-card-content class="qr-content">
-            @if (mode === 'scan') {
-              <p class="hint">Данные получены из QR-ссылки</p>
-            } @else if (linkLoading) {
+            @if (linkLoading) {
               <mat-spinner diameter="48"></mat-spinner>
             } @else if (qrImageDataUri) {
               <h3>Prosto.ID</h3>

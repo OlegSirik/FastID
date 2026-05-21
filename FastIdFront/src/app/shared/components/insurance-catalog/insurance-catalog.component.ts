@@ -15,7 +15,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatSelectModule } from '@angular/material/select';
-import { catchError, of } from 'rxjs';
+import { catchError, debounceTime, of, Subject } from 'rxjs';
 import { InsuranceSelectionService } from '../../../core/insurance-selection.service';
 import { PersonStateService } from '../../../core/person-state.service';
 import { FastIdPerson, FastIdService } from '../../../services/fastid.service';
@@ -72,31 +72,41 @@ export class InsuranceCatalogComponent implements OnInit, OnChanges {
 
   readonly packagePremiums = signal<Record<string, PackagePremiumState>>({});
 
+  private refreshPremiums$ = new Subject<void>();
+  private premiumGeneration = 0;
+  private lastPersonKey: string | null = null;
+
   ngOnInit(): void {
+    this.refreshPremiums$
+      .pipe(debounceTime(300), takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => this.refreshAllPremiums());
+
     this.selection
       .nsStateChanges()
       .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.refreshAllPremiums());
+      .subscribe(() => {
+        this.schedulePremiumRefresh();
+        this.syncSelectedPremiumToService();
+      });
 
     this.selection
       .selectedIdChanges()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => {
-        this.refreshAllPremiums();
+        this.schedulePremiumRefresh();
         this.syncSelectedPremiumToService();
       });
 
-    this.selection
-      .nsStateChanges()
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe(() => this.syncSelectedPremiumToService());
-
-    this.refreshAllPremiums();
+    this.schedulePremiumRefresh();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['person']) {
-      this.refreshAllPremiums();
+      const key = this.personKey(this.person);
+      if (key !== this.lastPersonKey) {
+        this.lastPersonKey = key;
+        this.schedulePremiumRefresh();
+      }
     }
   }
 
@@ -133,7 +143,7 @@ export class InsuranceCatalogComponent implements OnInit, OnChanges {
 
   onCustomSumChange(value: number): void {
     this.selection.setCustomSumInsured(value);
-    this.refreshAllPremiums();
+    this.schedulePremiumRefresh();
   }
 
   onPeriodStartChange(value: string): void {
@@ -178,6 +188,17 @@ export class InsuranceCatalogComponent implements OnInit, OnChanges {
     return state.error || '—';
   }
 
+  private schedulePremiumRefresh(): void {
+    this.refreshPremiums$.next();
+  }
+
+  private personKey(person: FastIdPerson | null): string {
+    if (!person) {
+      return '';
+    }
+    return JSON.stringify(person);
+  }
+
   private refreshAllPremiums(): void {
     if (!this.showNsCart) {
       this.packagePremiums.set({});
@@ -190,8 +211,9 @@ export class InsuranceCatalogComponent implements OnInit, OnChanges {
       this.syncSelectedPremiumToService();
       return;
     }
+    const generation = ++this.premiumGeneration;
     for (const pkg of this.nsPackages) {
-      this.loadPackagePremium(pkg, person);
+      this.loadPackagePremium(pkg, person, generation);
     }
     this.syncSelectedPremiumToService();
   }
@@ -200,7 +222,11 @@ export class InsuranceCatalogComponent implements OnInit, OnChanges {
     return this.person ?? this.personState.getPerson();
   }
 
-  private loadPackagePremium(pkg: NsPackageOption, person: FastIdPerson): void {
+  private loadPackagePremium(
+    pkg: NsPackageOption,
+    person: FastIdPerson,
+    generation: number,
+  ): void {
     const productCode = pkg.productCode ?? 'NS_CLASSIC';
     this.packagePremiums.update((map) => ({
       ...map,
@@ -224,6 +250,9 @@ export class InsuranceCatalogComponent implements OnInit, OnChanges {
         ),
       )
       .subscribe((res) => {
+        if (generation !== this.premiumGeneration) {
+          return;
+        }
         this.packagePremiums.update((map) => ({
           ...map,
           [pkg.id]:

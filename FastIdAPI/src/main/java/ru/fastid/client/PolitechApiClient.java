@@ -6,12 +6,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClient;
 import org.springframework.web.client.RestClientResponseException;
 import ru.fastid.config.PolitechProperties;
-import ru.fastid.dto.FastIdDecryptRequest;
-import ru.fastid.dto.FastIdPersonData;
 import ru.fastid.dto.FastIdPremiumRequest;
 import ru.fastid.dto.FastIdPremiumResponse;
-import ru.fastid.dto.FastIdSecureLinkRequest;
-import ru.fastid.dto.FastIdSecureLinkResponse;
 import ru.fastid.dto.LoginRequest;
 import ru.fastid.dto.PrincipalDto;
 import ru.fastid.dto.TokenResponse;
@@ -51,44 +47,6 @@ public class PolitechApiClient {
             .headers(headers -> applyAuthHeaders(headers, accessToken, null))
             .retrieve()
             .body(PrincipalDto.class);
-    }
-
-    public FastIdSecureLinkResponse createSecureLink(
-            String tenantCode,
-            String accessToken,
-            Long accountId,
-            FastIdSecureLinkRequest request) {
-        return restClient.post()
-            .uri("/api/v1/{tenant}/fastid/secure-link", tenantCode)
-            .headers(headers -> applyAuthHeaders(headers, accessToken, accountId))
-            .body(request)
-            .retrieve()
-            .body(FastIdSecureLinkResponse.class);
-    }
-
-    public FastIdPersonData decrypt(
-            String tenantCode,
-            String accessToken,
-            Long accountId,
-            FastIdDecryptRequest request) {
-        return restClient.post()
-            .uri("/api/v1/{tenant}/fastid/decrypt", tenantCode)
-            .headers(headers -> applyAuthHeaders(headers, accessToken, accountId))
-            .body(request)
-            .retrieve()
-            .body(FastIdPersonData.class);
-    }
-
-    public FastIdPersonData resolve(
-            String tenantCode,
-            String accessToken,
-            Long accountId,
-            String securedData) {
-        return restClient.get()
-            .uri("/api/v1/{tenant}/fastid/resolve?q={q}", tenantCode, securedData)
-            .headers(headers -> applyAuthHeaders(headers, accessToken, accountId))
-            .retrieve()
-            .body(FastIdPersonData.class);
     }
 
     public FastIdPremiumResponse calculatePremium(
